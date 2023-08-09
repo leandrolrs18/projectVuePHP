@@ -14,7 +14,7 @@ class User {
   public function __construct()
   {
       try {
-        $this->pdo = new PDO('mysql:host=localhost;dbname=apiuser', 'root', '051197Le');
+        $this->pdo = new PDO('mysql:host=localhost;dbname=apiuser', 'root', '');
         $this->pdo->setAttribute(PDO::ATTR_ERRMODE, PDO::ERRMODE_EXCEPTION);
 
       } 
