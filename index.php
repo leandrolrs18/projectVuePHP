@@ -1,72 +1,46 @@
 <?php
-  
-  // if(!array_key_exists('path', $_GET)){
-  //   echo 'Error. Path missing.' . array_key_exists('path', $_GET);
-  //   exit;
-  // }
 
-  // $path = explode('/', $_GET['path']);
-  
-  // if(count($path)==0 || $path[0] == ""){
-  //   echo 'Error. Path missing.';
-  //   exit;
-  // }
+require_once('user.php');
+header('Access-Control-Allow-Origin: *');
+header("Access-Control-Allow-Methods: HEAD, GET, POST, PUT, PATCH, DELETE, OPTIONS");
+header("Access-Control-Allow-Headers: X-API-KEY, Origin, X-Requested-With, Content-Type, Accept, Access-Control-Request-Method,Access-Control-Request-Headers, Authorization");
+header('Content-Type: application/json');
 
-  // $param1 = "";
-  // if(count($path)>1){
-  //   $param1 = $path[1];
-  // }
-  header('Access-Control-Allow-Origin: *');
-  header("Access-Control-Allow-Methods: HEAD, GET, POST, PUT, PATCH, DELETE, OPTIONS");
-  header("Access-Control-Allow-Headers: X-API-KEY, Origin, X-Requested-With, Content-Type, Accept, Access-Control-Request-Method,Access-Control-Request-Headers, Authorization");
-  header('Content-Type: application/json');
+$method = $_SERVER['REQUEST_METHOD'];
+header('Content-type: application/json');
+$body = file_get_contents('php://input');
+$user = new User();
 
-  $method = $_SERVER['REQUEST_METHOD'];
-  header('Content-type: application/json');
-  $body = file_get_contents('php://input');
+if($method === 'GET'){
 
-  if($method === 'GET'){
+  if ($_SERVER['REQUEST_URI'] == '/new') {
+    $response = file_get_contents('https://randomuser.me/api/');
+    $json = json_decode($response);
 
-    $contents = file_get_contents('licitacoes.json');
-    $json = json_decode($contents, true);
+    if($json) {
+      
+      $user->set_nome(str_replace('"','', (string)json_encode($json->results[0]->name->first).' '.json_encode($json->results[0]->name->last)));
+      $user->set_genero(str_replace('"','', (string) json_encode($json->results[0]->gender)));
+      $user->set_cidade(str_replace('"','', (string)json_encode($json->results[0]->location->city)));
+      $user->set_pais(str_replace('"','', (string)json_encode($json->results[0]->location->country)));
+      $user->set_username(str_replace('"','', (string)json_encode($json->results[0]->login->username)));
+      $user->set_email(str_replace('"','', (string)json_encode($json->results[0]->email)));
+      $user->set_idade(str_replace('"','', (string)json_encode($json->results[0]->dob->age)));
+      $user->set_telefone(str_replace('"','', (string)json_encode($json->results[0]->phone)));
+      $user->set_imagem(str_replace('"','', (string)json_encode($json->results[0]->picture->large)));
 
-    if($json){
-        echo json_encode($json);
-    }else{
-      echo '[]';
+      echo $user->insert_table();
+
     }
+    else {
+      echo 'erro na requisição';
+    }
+
   }
-  // if($method === 'POST'){
-  //   $jsonBody = json_decode($body, true);
-  //   $jsonBody['id'] = time();
-    
-  //   if(!$json[$path[0]]){
-  //     $json[$path[0]] = [];
-  //   }
-  //   $json[$path[0]][] = $jsonBody;
-  //   echo json_encode($jsonBody);
-  //   file_put_contents('db.json', json_encode($json));
-  // }
+  else if ($_SERVER['REQUEST_URI'] == '/all') {
+    echo $user->return_all();
+  }
 
+}
 
-  // if($method === 'PUT'){
-  //   if($json[$path[0]]){
-  //     if($param1==""){
-  //       echo 'error';
-  //     }else{
-  //       $encontrado = findById($json[$path[0]], $param1);
-  //       if($encontrado>=0){
-  //         $jsonBody = json_decode($body, true);
-  //         $jsonBody['id'] = $param1;
-  //         $json[$path[0]][$encontrado] = $jsonBody;
-  //         echo json_encode($json[$path[0]][$encontrado]);
-  //         file_put_contents('db.json', json_encode($json));
-  //       }else{
-  //         echo 'ERROR.';
-  //         exit;
-  //       }
-  //     }
-  //   }else{
-  //     echo 'error.';
-  //   }
-  // }
+?>
